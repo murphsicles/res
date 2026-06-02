@@ -1,0 +1,47 @@
+// Auto-converted from /tmp/overlay-broadcast/crates/res/src/breaker.rs
+
+/// The breaker state.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum BreakerState {
+ Closed,
+ Open,
+ HalfOpen,
+}
+
+/// A consecutive-failure circuit breaker.
+#[derive(Clone, Copy, Debug)]
+pub struct CircuitBreaker {
+ threshold: u32,
+ failures: u32,
+ state: BreakerState,
+}
+
+impl CircuitBreaker {
+ pub fn new(threshold: u32) -> Self {
+ Self { threshold: threshold.max(1), failures: 0, state: BreakerState::Closed }
+ }
+ 
+ pub fn state(&self) -> BreakerState {
+ self.state
+ }
+ 
+ pub fn is_tripped(&self) -> bool {
+ matches!(self.state, BreakerState::Open)
+ }
+ 
+ pub fn record_success(&mut self) {
+ self.failures = 0;
+ self.state = BreakerState::Closed;
+ }
+ 
+ pub fn record_failure(&mut self) {
+ self.failures = self.failures.saturating_add(1);
+ if self.failures >= self.threshold { self.state = BreakerState::Open; }
+ }
+ 
+ pub fn trial(&mut self) {
+ if matches!(self.state, BreakerState::Open) { self.state = BreakerState::HalfOpen; }
+ }
+ 
+}
+

@@ -1,0 +1,39 @@
+// Auto-converted from /tmp/overlay-broadcast/crates/res/src/resubmit.rs
+
+use std::collections::HashSet;
+/// The outcome of a submission attempt.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum SubmitOutcome {
+ Broadcast,
+ AlreadyKnown,
+ Rebroadcast,
+}
+
+/// Tracks known and evicted transactions for idempotent resubmission.
+#[derive(Clone, Debug, Default)]
+pub struct Resubmitter {
+ known: HashSet<[u8; 32]>,
+ evicted: HashSet<[u8; 32]>,
+}
+
+impl Resubmitter {
+ pub fn new() -> Self {
+ Self { known: HashSet::new(), evicted: HashSet::new() }
+ }
+ 
+ pub fn submit(&mut self, txid: [u8; 32]) -> SubmitOutcome {
+ if self.known.contains(&txid) { return SubmitOutcome::AlreadyKnown; }
+ let _ = self.known.insert(txid);
+ SubmitOutcome::Broadcast
+ }
+ 
+ pub fn mark_evicted(&mut self, txid: [u8; 32]) {
+ if self.known.contains(&txid) { let _ = self.evicted.insert(txid); }
+ }
+ 
+ pub fn resubmit_evicted(&mut self, txid: [u8; 32]) -> SubmitOutcome {
+ if self.evicted.remove(&txid) { SubmitOutcome::Rebroadcast } else { SubmitOutcome::AlreadyKnown }
+ }
+ 
+}
+

@@ -1,0 +1,46 @@
+// Auto-converted from /tmp/overlay-broadcast/crates/res/src/recovery.rs
+
+/// A member's on-chain record at snapshot time.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct MemberRecord {
+ pub member_id: u64,
+ pub output_spent: bool,
+ pub expiry: u64,
+}
+
+/// A snapshot of the on-chain session state.
+#[derive(Clone, Debug)]
+pub struct LedgerSnapshot {
+ pub members: Vec<MemberRecord>,
+ pub graph_root: [u8; 32],
+ pub now: u64,
+}
+
+/// A member's derived status.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum MemberStatus {
+ Renewed,
+ Active,
+ Revoked,
+}
+
+/// The derived session state(the rebuildable cache).
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct SessionState {
+ pub statuses: Vec<(u64, MemberStatus)>,
+ pub graph_root: [u8; 32],
+}
+
+/// Rebuild the derived session state from an on-chain snapshot. Deterministic: the same
+/// snapshot always yields the same state(the basis of kill-restart recovery).
+#[must_use]
+pub fn rebuild_from_chain(snapshot: &LedgerSnapshot) -> SessionState {
+ let _ = snapshot.members.iter().map(| member | (member.member_id, status_of(member, snapshot.now))).collect();
+ statuses.sort_by_key(| entry | entry.0);
+ SessionState { statuses, graph_root: snapshot.graph_root }
+}
+
+fn status_of(member: &MemberRecord, now: u64) -> MemberStatus {
+ if member.output_spent { MemberStatus::Renewed } else if member.expiry < now { MemberStatus::Revoked } else { MemberStatus::Active }
+}
+

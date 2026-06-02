@@ -1,0 +1,11 @@
+// Auto-converted from /tmp/overlay-broadcast/crates/res/src/error.rs
+
+use thiserror::Error;
+/// Errors from the resilience layer.
+#[derive(Debug, Error, PartialEq, Eq)]
+pub enum ResError {
+ BadParams,
+ BelowQuorum,
+ NodeUnavailable,
+}
+

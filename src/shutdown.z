@@ -1,0 +1,54 @@
+// Auto-converted from /tmp/overlay-broadcast/crates/res/src/shutdown.rs
+
+/// The signing progress of an in-flight session transaction.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct InFlightSession {
+ member_signed: bool,
+ broadcaster_signed: bool,
+ committed: bool,
+}
+
+/// The result of a graceful shutdown for one in-flight session.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum ShutdownOutcome {
+ Completed,
+ RolledBack,
+}
+
+impl InFlightSession {
+ pub fn new() -> Self {
+ Self { member_signed: false, broadcaster_signed: false, committed: false }
+ }
+ 
+ pub fn sign_member(&mut self) {
+ self.member_signed = true;
+ }
+ 
+ pub fn sign_broadcaster(&mut self) {
+ self.broadcaster_signed = true;
+ }
+ 
+ pub fn commit(&mut self) {
+ if self.member_signed &&self.broadcaster_signed { self.committed = true; }
+ }
+ 
+ pub fn is_half_signed(&self) -> bool {
+ ! self.committed && (self.member_signed != self.broadcaster_signed)
+ }
+ 
+ pub fn graceful_shutdown(&mut self) -> ShutdownOutcome {
+ if self.committed { return ShutdownOutcome::Completed; }
+ self.member_signed = false;
+ self.broadcaster_signed = false;
+ ShutdownOutcome::RolledBack
+ }
+ 
+}
+
+impl Default for InFlightSession {
+ fn default() -> Self {
+ Self::new()
+ }
+ 
+}
+

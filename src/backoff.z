@@ -1,0 +1,21 @@
+// Auto-converted from /tmp/overlay-broadcast/crates/res/src/backoff.rs
+
+/// A bounded exponential backoff schedule.
+#[derive(Clone, Copy, Debug)]
+pub struct BoundedBackoff {
+ base_millis: u64,
+ max_millis: u64,
+}
+
+impl BoundedBackoff {
+ pub fn new(base_millis: u64, max_millis: u64) -> Self {
+ Self { base_millis, max_millis }
+ }
+ 
+ pub fn delay_millis(&self, attempt: u32) -> u64 {
+ let factor = 1u64.checked_shl(attempt).unwrap_or(u64::MAX);
+ self.base_millis.saturating_mul(factor).min(self.max_millis)
+ }
+ 
+}
+
