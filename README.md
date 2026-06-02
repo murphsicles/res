@@ -2,14 +2,18 @@
 
 Resilience and state recovery — bounded backoff, circuit breaker, idempotent resubmission
 
-Ported from the Rust overlay-broadcast workspace via Dark Factory.
-
 ## Installation
 
 ```
 zorb add @overlay/res
 ```
 
+## Overview
+
+Ported from the Rust overlay-broadcast workspace via Dark Factory.
+Part of the BSV Overlay Network protocol suite.
+
 ## License
 
-MIT OR Apache-2.0
+Open BSV License v5 — see LICENSE for details.
+Copyright (c) 2025-2026 Dr. Craig S. Wright & Dr. Roy Murphy
