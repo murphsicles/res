@@ -1,6 +1,6 @@
 // Auto-converted from /tmp/overlay-broadcast/crates/res/src/quorum.rs
 
-use error::ResError;
+use crate::error::ResError;
 /// Check that a signing attempt has quorum. `available` signers out of `n`, threshold `k`.
 /// 
 /// # Errors
